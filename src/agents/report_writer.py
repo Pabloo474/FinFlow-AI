@@ -18,15 +18,16 @@ Guidelines:
 - Acknowledge data limitations when metrics are missing or flagged as errors
 - The report should be detailed, thorough, and actionable
 
-Format the report with these sections:
-1. Executive Summary
-2. Company Overview
-3. Market Research & News Analysis
-4. Financial Performance Analysis
-5. Key Metrics Breakdown
-6. Risks & Challenges
-7. Conclusion & Outlook
-"""
+    Format the report with these sections:
+    1. Executive Summary
+    2. Company Overview
+    3. Market Research & News Analysis
+    4. Financial Performance Analysis
+    5. Key Metrics Breakdown
+    6. Risks & Challenges
+    7. Conclusion & Outlook
+    8. References (Include a list of the news titles and sources used in the analysis)
+    """
 
 
 async def report_writer_node(state: FinancialGraphState) -> FinancialGraphState:

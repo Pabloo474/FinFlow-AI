@@ -24,7 +24,7 @@ async def create_financial_graph(checkpoint_dir: str = "./checkpoints") -> State
         checkpoint_dir: Directorio para archivos de checkpoint.
     """
     os.makedirs(checkpoint_dir, exist_ok=True)
-        checkpointer_path = os.path.join(checkpoint_dir, "finflow_checkpoints.db")
+    checkpointer_path = os.path.join(checkpoint_dir, "finflow_checkpoints.db")
     conn = await aiosqlite.connect(checkpointer_path)
     checkpointer = AsyncSqliteSaver(conn=conn)
 

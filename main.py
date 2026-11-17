@@ -6,9 +6,9 @@ import aiosqlite
 from datetime import datetime
 from dotenv import load_dotenv
 
-load_dotenv()
-
 from src.graph import create_financial_graph
+from src.utils.pdf_generator import generate_pdf_from_markdown
+
 
 logger = logging.getLogger("finflow_main")
 
@@ -86,19 +86,31 @@ async def shutdown() -> None:
         logger.warning(f"Error during async cleanup: {e}")
 
 
+from src.utils.pdf_generator import generate_pdf_from_markdown
+
 def print_report(result: dict) -> None:
-    """Formatea e imprime el reporte final."""
+    """Formatea e imprime el reporte final y genera un PDF."""
+    report_text = result.get("final_report", "No report generated")
+    ticker = result.get("company_ticker", "Unknown")
+    
     print("\n" + "=" * 70)
     print("FINANCIAL ANALYSIS REPORT")
     print("=" * 70)
-    print(result.get("final_report", "No report generated"))
+    print(report_text)
     print("\n" + "=" * 70)
-    print(f"Company: {result.get('company_ticker')}")
+    print(f"Company: {ticker}")
     print(f"QA Passed: {result.get('qa_passed')}")
     print(f"Iterations: {result.get('iteration_count')}")
     if result.get("errors"):
         print(f"Errors: {result['errors']}")
     print("=" * 70)
+
+    # Generate PDF
+    try:
+        pdf_path = generate_pdf_from_markdown(report_text, ticker)
+        print(f"\n[SUCCESS] Professional PDF report generated: {pdf_path}")
+    except Exception as e:
+        print(f"\n[ERROR] Failed to generate PDF: {e}")
 
 
 async def main() -> None:
