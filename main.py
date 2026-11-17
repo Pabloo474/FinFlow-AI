@@ -2,18 +2,13 @@ import asyncio
 import logging
 import os
 import sys
-import aiosqlite
 from datetime import datetime
-from dotenv import load_dotenv
 
 from src.graph import create_financial_graph
 from src.utils.pdf_generator import generate_pdf_from_markdown
 
 
 logger = logging.getLogger("finflow_main")
-
-# Global reference to the aiosqlite connection for cleanup
-_checkpointer_conn = None
 
 
 def setup_logging(log_dir: str = "./logs") -> None:
@@ -43,7 +38,6 @@ def setup_logging(log_dir: str = "./logs") -> None:
 
 async def run_analysis(ticker: str, objective: str = None) -> dict:
     """Ejecuta el análisis y formatea la salida."""
-    global _checkpointer_conn
 
     graph = await create_financial_graph()
 
@@ -66,27 +60,6 @@ async def run_analysis(ticker: str, objective: str = None) -> dict:
 
     return result
 
-
-async def shutdown() -> None:
-    """Cierra gracefulmente las conexiones async antes de que el event loop termine."""
-    global _checkpointer_conn
-
-    try:
-        if _checkpointer_conn is not None:
-            await _checkpointer_conn.close()
-            _checkpointer_conn = None
-            logger.info("Checkpointer database connection closed")
-    except RuntimeError as e:
-        # Event loop may already be closed; that's acceptable at shutdown
-        if "Event loop is closed" in str(e) or "closed" in str(e).lower():
-            logger.debug("Event loop already closed during shutdown (acceptable)")
-        else:
-            logger.warning(f"Unexpected error during shutdown: {e}")
-    except Exception as e:
-        logger.warning(f"Error during async cleanup: {e}")
-
-
-from src.utils.pdf_generator import generate_pdf_from_markdown
 
 def print_report(result: dict) -> None:
     """Formatea e imprime el reporte final y genera un PDF."""
@@ -128,10 +101,3 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         logger.info("Interrupted by user")
-    finally:
-        # Run async cleanup to close aiosqlite connections
-        loop = asyncio.new_event_loop()
-        try:
-            loop.run_until_complete(shutdown())
-        finally:
-            loop.close()
